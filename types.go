@@ -1,5 +1,7 @@
 package main
 
+import pokecache "cli-pokedex/internal"
+
 type cliCommand struct {
 	name           string
 	description    string
@@ -10,6 +12,7 @@ type cliCommand struct {
 type config struct {
 	nextUrl     string
 	previousUrl string
+	pokecache   *pokecache.Cache
 }
 
 type locationAreaResponse struct {
