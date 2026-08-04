@@ -8,6 +8,7 @@ import (
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
+	commands := getCommands()
 	for {
 		fmt.Print("Pokedex > ")
 		_ = scanner.Scan()
@@ -15,11 +16,11 @@ func main() {
 			break
 		}
 		input := scanner.Text()
-		command, ok := getCommands()[input]
+		command, ok := commands[input]
 		if !ok {
 			fmt.Print("Unknown command\n")
 			continue
 		}
-		command.callback()
+		command.callback(command.callbackConfig)
 	}
 }
