@@ -19,7 +19,7 @@ const (
 
 func getCommands() map[string]cliCommand {
 	mapConfig := &config{nextUrl: LocationAreaApiUrl, previousUrl: "", pokecache: pokecache.NewCache(CacheDuration)}
-	catchInspectConfig := &config{pokecache: pokecache.NewCache(CacheDuration), pokedex: make(map[string]pokemonType)}
+	pokedexConfig := &config{pokecache: pokecache.NewCache(CacheDuration), pokedex: make(map[string]pokemonType)}
 	return map[string]cliCommand{
 		"help": {
 			name:           "help",
@@ -31,7 +31,7 @@ func getCommands() map[string]cliCommand {
 			name:           "exit",
 			description:    "Exit the Pokedex",
 			callback:       commandExit,
-			callbackConfig: &config{},
+			callbackConfig: pokedexConfig,
 		},
 		"map": {
 			name:           "map",
@@ -55,25 +55,29 @@ func getCommands() map[string]cliCommand {
 			name:           "catch",
 			description:    "Catch a Pokemon passed as an argument <pokemon-name>",
 			callback:       commandCatch,
-			callbackConfig: catchInspectConfig,
+			callbackConfig: pokedexConfig,
 		},
 		"inspect": {
 			name:           "inspect",
 			description:    "Inspect a Pokemon passed as an argument <pokemon-name>",
 			callback:       commandInspect,
-			callbackConfig: catchInspectConfig,
+			callbackConfig: pokedexConfig,
 		},
 		"pokedex": {
 			name:           "pokedex",
-			description:    "Display the Pokedex",
+			description:    "Display the Pokedex (or wipe it using 'clear' as an argument)",
 			callback:       commandPokedex,
-			callbackConfig: catchInspectConfig,
+			callbackConfig: pokedexConfig,
 		},
 	}
 }
 
 func commandExit(cfg *config, args ...string) error {
 	fmt.Printf("Closing the Pokedex... Goodbye!\n")
+	err := savePokedex(cfg.pokedex)
+	if err != nil {
+		fmt.Printf("error saving pokedex: %v\n", err)
+	}
 	os.Exit(0)
 	return nil
 }
@@ -283,6 +287,13 @@ func commandInspect(cfg *config, args ...string) error {
 
 func commandPokedex(cfg *config, args ...string) error {
 	fmt.Printf("Pokedex: \n")
+	if len(args) > 0 {
+		if args[0] == "clear" {
+			cfg.pokedex = make(map[string]pokemonType)
+			fmt.Printf("  - Pokedex cleared\n")
+			return nil
+		}
+	}
 	if len(cfg.pokedex) == 0 {
 		fmt.Printf("  - No Pokemon caught yet\n")
 		return nil

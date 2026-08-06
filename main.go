@@ -10,6 +10,13 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	commands := getCommands()
 
+	pokedex, err := loadPokedex()
+	if err != nil {
+		fmt.Printf("Error loading pokedex: %v\n", err)
+	} else {
+		commands["catch"].callbackConfig.pokedex = pokedex
+	}
+
 	for {
 		fmt.Print("Pokedex > ")
 		_ = scanner.Scan()
